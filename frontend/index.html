@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منظومة مندوبين التوصيل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== شاشة الدخول ===== -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-mark">
+      <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+        <rect width="46" height="46" rx="11" fill="#FF9900"/>
+        <path d="M12 30c4 3 8 4.5 11 4.5s7-1.5 11-4.5" stroke="#171512" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <path d="M13 19l10-6 10 6-10 6-10-6z" stroke="#171512" stroke-width="2" stroke-linejoin="round" fill="none"/>
+        <path d="M13 19v7M33 19v7M23 25v6" stroke="#171512" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1>منظومة مندوبين التوصيل</h1>
+    <p class="login-sub">سجّل الدخول لعرض وإدارة بيانات المناديب</p>
+    <form id="loginForm">
+      <label for="passwordInput">كلمة المرور</label>
+      <input type="password" id="passwordInput" autocomplete="current-password" required>
+      <button type="submit" id="loginBtn">دخول</button>
+      <p class="login-error" id="loginError"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ===== التطبيق الرئيسي ===== -->
+<div id="app" class="app hidden">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-mark">
+        <svg width="30" height="30" viewBox="0 0 46 46" fill="none">
+          <rect width="46" height="46" rx="11" fill="#FF9900"/>
+          <path d="M12 30c4 3 8 4.5 11 4.5s7-1.5 11-4.5" stroke="#171512" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M13 19l10-6 10 6-10 6-10-6z" stroke="#171512" stroke-width="2.2" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="topbar-title">منظومة مندوبين التوصيل</div>
+        <div class="sync-status" id="syncStatus">
+          <span class="sync-dot"></span>
+          <span id="syncText">متصل بالشيت</span>
+        </div>
+      </div>
+    </div>
+    <button class="logout-btn" id="logoutBtn">تسجيل الخروج</button>
+  </header>
+
+  <nav class="branch-tabs" id="branchTabs"></nav>
+
+  <main class="main">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5.2" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input type="text" id="searchInput" placeholder="بحث بالاسم، الرقم القومي، رقم اللوحة...">
+      </div>
+      <div class="toolbar-stats">
+        <span id="countLabel">0 مندوب</span>
+      </div>
+      <button class="btn-primary" id="addNewBtn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        إضافة مندوب
+      </button>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div class="empty-state hidden" id="emptyState">
+      <p>لا يوجد مناديب في هذا الفرع بعد</p>
+      <button class="btn-primary" id="emptyAddBtn">إضافة أول مندوب</button>
+    </div>
+  </main>
+</div>
+
+<!-- ===== مودال إضافة/تعديل ===== -->
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">إضافة مندوب جديد</h2>
+      <button class="modal-close" id="modalClose">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <form id="daForm">
+      <input type="hidden" id="rowIndex">
+
+      <div class="form-section-label">بيانات المندوب</div>
+      <div class="form-grid">
+        <div class="field full">
+          <label class="req">اسم المندوب</label>
+          <input type="text" id="f_daName" required>
+        </div>
+        <div class="field">
+          <label class="req">الرقم القومي</label>
+          <input type="text" id="f_nationalId" inputmode="numeric" maxlength="14" required>
+        </div>
+        <div class="field">
+          <label>الشركة الناقلة</label>
+          <input type="text" id="f_vendor" value="RAWA">
+        </div>
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input type="email" id="f_email">
+        </div>
+        <div class="field">
+          <label>رقم الهاتف</label>
+          <input type="tel" id="f_phone">
+        </div>
+        <div class="field">
+          <label>Transporter ID</label>
+          <input type="text" id="f_transporterId">
+        </div>
+      </div>
+
+      <div class="form-section-label">بيانات المركبة</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>نوع المركبة</label>
+          <select id="f_vehicleType">
+            <option value="Motorbike">Motorbike</option>
+            <option value="Bicycle">Bicycle</option>
+            <option value="Car">Car</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>لوحة المركبة</label>
+          <input type="text" id="f_vehiclePlate">
+        </div>
+        <div class="field">
+          <label>نوع الموديل</label>
+          <select id="f_modelType">
+            <option value="">اختر</option>
+            <option value="5H">5H</option>
+            <option value="10H">10H</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-label">رخصة القيادة</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>رقم الرخصة</label>
+          <input type="text" id="f_licenseNumber">
+        </div>
+        <div class="field">
+          <label>لغة الرخصة</label>
+          <select id="f_licenseType">
+            <option value="">اختر</option>
+            <option value="english">english</option>
+            <option value="Arbic">Arbic</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>تاريخ الإصدار</label>
+          <input type="date" id="f_licenseIssuance">
+        </div>
+        <div class="field">
+          <label>تاريخ الانتهاء</label>
+          <input type="date" id="f_licenseExpiration">
+        </div>
+        <div class="field">
+          <label>تاريخ الميلاد</label>
+          <input type="date" id="f_dob">
+        </div>
+        <div class="field checkbox-field">
+          <label class="checkbox-row">
+            <input type="checkbox" id="f_flex">
+            <span>Flex</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section-label">العنوان</div>
+      <div class="form-grid">
+        <div class="field full">
+          <label>العنوان</label>
+          <input type="text" id="f_address">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-danger hidden" id="deleteBtn">حذف المندوب</button>
+        <div class="modal-actions-right">
+          <button type="button" class="btn-ghost" id="cancelBtn">إلغاء</button>
+          <button type="submit" class="btn-primary" id="saveBtn">حفظ</button>
+        </div>
+      </div>
+      <p class="form-msg" id="formMsg"></p>
+    </form>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
