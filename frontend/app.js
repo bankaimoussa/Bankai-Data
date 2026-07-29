@@ -7,6 +7,16 @@ let searchTerm = "";
 let pollTimer = null;
 let editingRow = null;
 
+// ============ OCR State ============
+// لكل نوع مستند: الملف المختار + رابط الصورة بعد الرفع (لو حصل)
+const OCR_DOC_TYPES = ["nationalId", "licenseDriving", "licenseVehicle"];
+let ocrState = {}; // { nationalId: { file, imageUrl }, ... }
+function resetOcrState() {
+  ocrState = {};
+  OCR_DOC_TYPES.forEach(dt => { ocrState[dt] = { file: null, imageUrl: null }; });
+}
+resetOcrState();
+
 // ============ Elements ============
 const loginScreen = document.getElementById("loginScreen");
 const app = document.getElementById("app");
@@ -281,6 +291,7 @@ function openAddModal() {
   document.getElementById("f_vehicleType").value = "Motorbike";
   deleteBtn.classList.add("hidden");
   formMsg.textContent = "";
+  resetOcrUi();
   modalOverlay.classList.remove("hidden");
 }
 
@@ -293,6 +304,22 @@ function openEditModal(d) {
   document.getElementById("f_flex").checked = d.flex === "TRUE" || d.flex === true;
   deleteBtn.classList.remove("hidden");
   formMsg.textContent = "";
+  resetOcrUi();
+  // لو المندوب عنده صور مستندات محفوظة من قبل، اعرضها كمعاينة
+  const existingUrls = {
+    nationalId: d.nationalIdImageUrl,
+    licenseDriving: d.licenseDrivingImageUrl,
+    licenseVehicle: d.licenseVehicleImageUrl
+  };
+  OCR_DOC_TYPES.forEach(dt => {
+    if (existingUrls[dt]) {
+      ocrState[dt].imageUrl = existingUrls[dt];
+      const preview = document.getElementById(`ocrPreview_${dt}`);
+      preview.innerHTML = `<img src="${existingUrls[dt]}" alt="">`;
+      document.getElementById(`ocrExtract_${dt}`).disabled = true;
+      setOcrStatus(dt, "تم رفع صورة من قبل", "ok");
+    }
+  });
   modalOverlay.classList.remove("hidden");
 }
 
@@ -306,6 +333,107 @@ modalClose.addEventListener("click", closeModal);
 cancelBtn.addEventListener("click", closeModal);
 modalOverlay.addEventListener("click", (e) => { if (e.target === modalOverlay) closeModal(); });
 
+// ============ OCR: رفع الصور واستخراج البيانات ============
+function resetOcrUi() {
+  resetOcrState();
+  OCR_DOC_TYPES.forEach(dt => {
+    const preview = document.getElementById(`ocrPreview_${dt}`);
+    preview.innerHTML = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2.5" y="5" width="17" height="12" rx="1.6" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="10.5" r="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14.5c.5-1.6 1.9-2.4 3.5-1.7M13 9h4M13 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+    document.getElementById(`ocrFile_${dt}`).value = "";
+    document.getElementById(`ocrExtract_${dt}`).disabled = true;
+    document.querySelector(`.ocr-slot[data-doctype="${dt}"]`).classList.remove("has-image", "done", "error");
+    setOcrStatus(dt, "", "");
+  });
+}
+
+function setOcrStatus(dt, msg, kind) {
+  const el = document.getElementById(`ocrStatus_${dt}`);
+  el.textContent = msg;
+  el.className = "ocr-slot-status" + (kind ? " " + kind : "");
+}
+
+// نتائج الاستخراج بترسم فوق الحقول المطابقة في الفورم
+// docType -> [fieldIds] (مطابقة أسماء المفاتيح في رد الـ OCR بأسماء حقول الفورم)
+const OCR_FIELD_TARGETS = {
+  nationalId: ["daName", "nationalId", "dob", "address"],
+  licenseDriving: ["licenseNumber", "licenseType", "licenseIssuance", "licenseExpiration", "daName"],
+  licenseVehicle: ["vehiclePlate", "vehicleType", "modelType", "licenseExpiration"]
+};
+
+function applyOcrResult(dt, data) {
+  const targets = OCR_FIELD_TARGETS[dt] || [];
+  targets.forEach(key => {
+    if (data[key] === undefined || data[key] === null || data[key] === "") return;
+    const fieldId = fieldMap[key];
+    if (!fieldId) return;
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+    // ما نكتبش فوق قيمة موجودة بالفعل غير لو فاضية (تفادي الكتابة فوق تعديل يدوي)
+    if (!el.value) el.value = data[key];
+  });
+}
+
+OCR_DOC_TYPES.forEach(dt => {
+  const fileInput = document.getElementById(`ocrFile_${dt}`);
+  const extractBtn = document.getElementById(`ocrExtract_${dt}`);
+  const slot = document.querySelector(`.ocr-slot[data-doctype="${dt}"]`);
+
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    ocrState[dt].file = file;
+    ocrState[dt].imageUrl = null;
+    extractBtn.disabled = false;
+    slot.classList.add("has-image");
+    slot.classList.remove("done", "error");
+    setOcrStatus(dt, "جاهزة للاستخراج", "");
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.getElementById(`ocrPreview_${dt}`).innerHTML = `<img src="${reader.result}" alt="">`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  extractBtn.addEventListener("click", async () => {
+    const file = ocrState[dt].file;
+    if (!file) return;
+
+    extractBtn.disabled = true;
+    extractBtn.classList.add("loading");
+    setOcrStatus(dt, "جارِ استخراج البيانات...", "");
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("branch", currentBranch || "");
+      const nationalIdVal = document.getElementById("f_nationalId").value;
+      if (nationalIdVal) formData.append("nationalId", nationalIdVal);
+
+      const res = await fetch(`${API_BASE}/api/ocr/${dt}`, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        body: formData
+      });
+      const result = await res.json();
+      if (!result.success) throw new Error(result.message || "فشل الاستخراج");
+
+      applyOcrResult(dt, result.data || {});
+      if (result.imageUrl) ocrState[dt].imageUrl = result.imageUrl;
+
+      slot.classList.add("done");
+      slot.classList.remove("error");
+      setOcrStatus(dt, result.imageStored ? "تم الاستخراج والحفظ" : "تم الاستخراج (لم يتم حفظ الصورة)", "ok");
+    } catch (err) {
+      slot.classList.add("error");
+      setOcrStatus(dt, err.message, "err");
+    } finally {
+      extractBtn.disabled = false;
+      extractBtn.classList.remove("loading");
+    }
+  });
+});
+
 // ============ Save (add / edit) ============
 daForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -315,6 +443,9 @@ daForm.addEventListener("submit", async (e) => {
     payload[key] = document.getElementById(id).value;
   });
   payload.flex = document.getElementById("f_flex").checked ? "TRUE" : "FALSE";
+  payload.nationalIdImageUrl = ocrState.nationalId.imageUrl || "";
+  payload.licenseDrivingImageUrl = ocrState.licenseDriving.imageUrl || "";
+  payload.licenseVehicleImageUrl = ocrState.licenseVehicle.imageUrl || "";
 
   const saveBtn = document.getElementById("saveBtn");
   saveBtn.disabled = true;
