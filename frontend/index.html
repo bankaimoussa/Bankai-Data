@@ -140,6 +140,60 @@
     <form id="daForm">
       <input type="hidden" id="rowIndex">
 
+      <div class="form-section-label">استخراج البيانات من المستندات (OCR)</div>
+      <div class="ocr-grid">
+        <div class="ocr-slot" data-doctype="nationalId">
+          <div class="ocr-slot-preview" id="ocrPreview_nationalId">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2.5" y="5" width="17" height="12" rx="1.6" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="10.5" r="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14.5c.5-1.6 1.9-2.4 3.5-1.7M13 9h4M13 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="ocr-slot-body">
+            <span class="ocr-slot-title">البطاقة الشخصية</span>
+            <div class="ocr-slot-actions">
+              <label class="btn-ghost btn-small ocr-upload-btn">
+                اختر صورة
+                <input type="file" accept="image/jpeg,image/png,image/webp" class="ocr-file-input" id="ocrFile_nationalId" hidden>
+              </label>
+              <button type="button" class="btn-primary btn-small ocr-extract-btn" id="ocrExtract_nationalId" disabled>استخرج البيانات</button>
+            </div>
+            <p class="ocr-slot-status" id="ocrStatus_nationalId"></p>
+          </div>
+        </div>
+
+        <div class="ocr-slot" data-doctype="licenseDriving">
+          <div class="ocr-slot-preview" id="ocrPreview_licenseDriving">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2.5" y="5" width="17" height="12" rx="1.6" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="10.5" r="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14.5c.5-1.6 1.9-2.4 3.5-1.7M13 9h4M13 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="ocr-slot-body">
+            <span class="ocr-slot-title">رخصة القيادة</span>
+            <div class="ocr-slot-actions">
+              <label class="btn-ghost btn-small ocr-upload-btn">
+                اختر صورة
+                <input type="file" accept="image/jpeg,image/png,image/webp" class="ocr-file-input" id="ocrFile_licenseDriving" hidden>
+              </label>
+              <button type="button" class="btn-primary btn-small ocr-extract-btn" id="ocrExtract_licenseDriving" disabled>استخرج البيانات</button>
+            </div>
+            <p class="ocr-slot-status" id="ocrStatus_licenseDriving"></p>
+          </div>
+        </div>
+
+        <div class="ocr-slot" data-doctype="licenseVehicle">
+          <div class="ocr-slot-preview" id="ocrPreview_licenseVehicle">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2.5" y="5" width="17" height="12" rx="1.6" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="10.5" r="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14.5c.5-1.6 1.9-2.4 3.5-1.7M13 9h4M13 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="ocr-slot-body">
+            <span class="ocr-slot-title">رخصة المركبة</span>
+            <div class="ocr-slot-actions">
+              <label class="btn-ghost btn-small ocr-upload-btn">
+                اختر صورة
+                <input type="file" accept="image/jpeg,image/png,image/webp" class="ocr-file-input" id="ocrFile_licenseVehicle" hidden>
+              </label>
+              <button type="button" class="btn-primary btn-small ocr-extract-btn" id="ocrExtract_licenseVehicle" disabled>استخرج البيانات</button>
+            </div>
+            <p class="ocr-slot-status" id="ocrStatus_licenseVehicle"></p>
+          </div>
+        </div>
+      </div>
+
       <div class="form-section-label">بيانات المندوب</div>
       <div class="form-grid">
         <div class="field full">
