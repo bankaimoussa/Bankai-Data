@@ -203,7 +203,7 @@ function renderCards() {
       </div>
       <div class="da-card-footer">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5s5 3.2 5 7.2a5 5 0 01-10 0c0-4 5-7.2 5-7.2z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8.5" r="1.6" stroke="currentColor" stroke-width="1.3"/></svg>
-        <span>${escapeHtml(truncate(d.address, 30))}</span>
+        <span>${escapeHtml(d.address || "-")}</span>
       </div>
     `;
     card.addEventListener("click", () => openEditModal(d));
