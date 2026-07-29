@@ -208,15 +208,15 @@ function renderCards() {
         </div>
         <div class="da-cell">
           <span class="cell-label">الهاتف</span>
-          <span class="cell-value">${escapeHtml(d.phone || "-")}</span>
+          <span class="cell-value phone-value">${escapeHtml(d.phone || "-")}</span>
         </div>
         <div class="da-cell">
           <span class="cell-label">لوحة المركبة</span>
-          <span class="cell-value ar">${escapeHtml(d.vehiclePlate || "-")}</span>
+          <span class="cell-value ar plate-value">${escapeHtml(d.vehiclePlate || "-")}</span>
         </div>
         <div class="da-cell">
           <span class="cell-label">انتهاء الرخصة</span>
-          <span class="cell-value ${expiryClass}">${escapeHtml(d.licenseExpiration || "-")}</span>
+          <span class="cell-value expiry-value ${expiryClass}">${escapeHtml(d.licenseExpiration || "-")}</span>
         </div>
       </div>
       <div class="da-card-footer">
