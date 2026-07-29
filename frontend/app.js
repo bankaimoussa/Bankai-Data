@@ -355,8 +355,8 @@ function setOcrStatus(dt, msg, kind) {
 // نتائج الاستخراج بترسم فوق الحقول المطابقة في الفورم
 // docType -> [fieldIds] (مطابقة أسماء المفاتيح في رد الـ OCR بأسماء حقول الفورم)
 const OCR_FIELD_TARGETS = {
-  nationalId: ["daName", "nationalId", "dob", "address"],
-  licenseDriving: ["licenseNumber", "licenseType", "licenseIssuance", "licenseExpiration", "daName"],
+  nationalId: ["dob", "address"],
+  licenseDriving: ["daName", "nationalId", "licenseNumber", "licenseIssuance", "licenseExpiration"],
   licenseVehicle: ["vehiclePlate", "vehicleType", "modelType", "licenseExpiration"]
 };
 
