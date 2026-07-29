@@ -3,10 +3,24 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { google } = require("googleapis");
+const multer = require("multer");
+const ocr = require("./ocr");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// رفع الصور في الذاكرة (بدون كتابة على القرص) - حد أقصى 8MB للصورة
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.mimetype)) {
+      return cb(new Error("الصورة لازم تكون JPEG أو PNG أو WEBP"));
+    }
+    cb(null, true);
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -39,6 +53,7 @@ const COLUMNS = [
   "phone", "licenseIssuance", "licenseExpiration", "dob",
   "licenseNumber", "licenseType", "flex", "address"
 ];
+const SHEET_RANGE_COLS = "Q";
 
 // BRANCHES format: "DisplayName:ActualSheetTabName,DisplayName2:ActualSheetTabName2"
 // لو مفيش ":" هيتعامل مع الاسم كـ اسم عرض واسم تاب في نفس الوقت
@@ -97,7 +112,7 @@ app.get("/api/branch/:branch", requireAuth, async (req, res) => {
       return res.status(400).json({ success: false, message: "فرع غير معروف" });
     }
     const sheets = await getSheetsClient();
-    const range = `'${sheetTab}'!A2:Q1000`;
+    const range = `'${sheetTab}'!A2:${SHEET_RANGE_COLS}1000`;
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range
@@ -135,7 +150,7 @@ app.post("/api/branch/:branch", requireAuth, async (req, res) => {
     const sheets = await getSheetsClient();
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `'${sheetTab}'!A2:Q2`,
+      range: `'${sheetTab}'!A2:${SHEET_RANGE_COLS}2`,
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values: [row] }
@@ -161,7 +176,7 @@ app.put("/api/branch/:branch/:rowIndex", requireAuth, async (req, res) => {
     const sheets = await getSheetsClient();
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
-      range: `'${sheetTab}'!A${rowIndex}:Q${rowIndex}`,
+      range: `'${sheetTab}'!A${rowIndex}:${SHEET_RANGE_COLS}${rowIndex}`,
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [row] }
     });
@@ -184,13 +199,53 @@ app.delete("/api/branch/:branch/:rowIndex", requireAuth, async (req, res) => {
     const sheets = await getSheetsClient();
     await sheets.spreadsheets.values.clear({
       spreadsheetId: SPREADSHEET_ID,
-      range: `'${sheetTab}'!A${rowIndex}:Q${rowIndex}`
+      range: `'${sheetTab}'!A${rowIndex}:${SHEET_RANGE_COLS}${rowIndex}`
     });
     res.json({ success: true, message: "تم الحذف" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "خطأ في الحذف: " + err.message });
   }
+});
+
+// ---------- OCR (استخراج بيانات من صور المستندات فقط، بدون تخزين الصورة) ----------
+// docType المتاحة: nationalId | licenseDriving | licenseVehicle
+app.post("/api/ocr/:docType", requireAuth, upload.single("image"), async (req, res) => {
+  try {
+    const docType = req.params.docType;
+    if (!ocr.DOC_TYPES.includes(docType)) {
+      return res.status(400).json({ success: false, message: "نوع مستند غير معروف" });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "لم يتم إرفاق صورة" });
+    }
+
+    const base64Image = req.file.buffer.toString("base64");
+
+    let extracted;
+    try {
+      extracted = await ocr.extractFromImage(docType, base64Image);
+    } catch (ocrErr) {
+      console.error("OCR error:", ocrErr);
+      return res.status(502).json({ success: false, message: "فشل استخراج البيانات: " + ocrErr.message });
+    }
+
+    res.json({
+      success: true,
+      data: extracted
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "خطأ غير متوقع: " + err.message });
+  }
+});
+
+// Multer errors (حجم الصورة كبير / نوع غير مدعوم) بترجع كـ exception عادي - نمسكها هنا
+app.use((err, req, res, next) => {
+  if (err && err.message) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  next(err);
 });
 
 app.listen(PORT, () => {
