@@ -193,8 +193,8 @@ function renderCards() {
           <span class="cell-value">${escapeHtml(d.phone || "-")}</span>
         </div>
         <div class="da-cell">
-          <span class="cell-label">المركبة</span>
-          <span class="cell-value ar">${escapeHtml(d.vehicleType || "-")} · ${escapeHtml(d.vehiclePlate || "-")}</span>
+          <span class="cell-label">لوحة المركبة</span>
+          <span class="cell-value ar">${escapeHtml(d.vehiclePlate || "-")}</span>
         </div>
         <div class="da-cell">
           <span class="cell-label">انتهاء الرخصة</span>
