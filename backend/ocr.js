@@ -3,7 +3,7 @@
 // ============================================================
 
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "gemma4:cloud";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "gemma4:31b-cloud";
 const OLLAMA_URL = "https://ollama.com/api/chat";
 
 // docType: nationalId | licenseDriving | licenseVehicle
@@ -116,6 +116,11 @@ async function extractFromImage(docType, base64Image) {
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
+    console.error("Ollama request failed", {
+      status: res.status,
+      model: OLLAMA_MODEL,
+      body: errText
+    });
     throw new Error(`فشل الاتصال بـ Ollama (${res.status}): ${errText.slice(0, 300)}`);
   }
 
