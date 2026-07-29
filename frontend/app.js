@@ -147,6 +147,8 @@ function setSyncState(state) {
 
 // ============ Render cards ============
 function renderCards() {
+  renderDashboard();
+
   const filtered = currentData.filter(d => {
     if (!searchTerm) return true;
     const s = searchTerm.toLowerCase();
@@ -230,6 +232,29 @@ function parseDate(str) {
 function truncate(s, n) { return (s || "-").length > n ? s.slice(0, n) + "…" : (s || "-"); }
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// ============ Dashboard stats ============
+const statTotal = document.getElementById("statTotal");
+const statValid = document.getElementById("statValid");
+const statSoon = document.getElementById("statSoon");
+const statExpired = document.getElementById("statExpired");
+const statFlex = document.getElementById("statFlex");
+
+function renderDashboard() {
+  let valid = 0, soon = 0, expired = 0, flex = 0;
+  currentData.forEach(d => {
+    const cls = getExpiryClass(d.licenseExpiration);
+    if (cls === "expiry-warn") expired++;
+    else if (cls === "expiry-soon") soon++;
+    else if (d.licenseExpiration) valid++;
+    if (d.flex === "TRUE" || d.flex === true) flex++;
+  });
+  statTotal.textContent = currentData.length;
+  statValid.textContent = valid;
+  statSoon.textContent = soon;
+  statExpired.textContent = expired;
+  statFlex.textContent = flex;
 }
 
 // ============ Search ============
