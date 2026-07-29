@@ -40,7 +40,20 @@ const COLUMNS = [
   "licenseNumber", "licenseType", "flex", "address"
 ];
 
-const BRANCHES = (process.env.BRANCHES || "QCD1,QCD2").split(",").map(s => s.trim());
+// BRANCHES format: "DisplayName:ActualSheetTabName,DisplayName2:ActualSheetTabName2"
+// لو مفيش ":" هيتعامل مع الاسم كـ اسم عرض واسم تاب في نفس الوقت
+// مثال: "QCD1:QCD1DATA,QCD2:QCD2 DATA"
+const BRANCH_MAP = {}; // displayName -> actual sheet tab name
+(process.env.BRANCHES || "QCD1,QCD2").split(",").forEach(entry => {
+  const trimmed = entry.trim();
+  if (trimmed.includes(":")) {
+    const [display, actual] = trimmed.split(":");
+    BRANCH_MAP[display.trim()] = actual.trim();
+  } else {
+    BRANCH_MAP[trimmed] = trimmed;
+  }
+});
+const BRANCHES = Object.keys(BRANCH_MAP);
 
 // ---------- Auth middleware ----------
 function requireAuth(req, res, next) {
@@ -79,11 +92,12 @@ app.get("/api/branches", requireAuth, (req, res) => {
 app.get("/api/branch/:branch", requireAuth, async (req, res) => {
   try {
     const branch = req.params.branch;
-    if (!BRANCHES.includes(branch)) {
+    const sheetTab = BRANCH_MAP[branch];
+    if (!sheetTab) {
       return res.status(400).json({ success: false, message: "فرع غير معروف" });
     }
     const sheets = await getSheetsClient();
-    const range = `${branch}!A2:Q1000`;
+    const range = `'${sheetTab}'!A2:Q1000`;
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range
@@ -109,7 +123,8 @@ app.get("/api/branch/:branch", requireAuth, async (req, res) => {
 app.post("/api/branch/:branch", requireAuth, async (req, res) => {
   try {
     const branch = req.params.branch;
-    if (!BRANCHES.includes(branch)) {
+    const sheetTab = BRANCH_MAP[branch];
+    if (!sheetTab) {
       return res.status(400).json({ success: false, message: "فرع غير معروف" });
     }
     const data = req.body;
@@ -120,7 +135,7 @@ app.post("/api/branch/:branch", requireAuth, async (req, res) => {
     const sheets = await getSheetsClient();
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${branch}!A2:Q2`,
+      range: `'${sheetTab}'!A2:Q2`,
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values: [row] }
@@ -136,8 +151,9 @@ app.post("/api/branch/:branch", requireAuth, async (req, res) => {
 app.put("/api/branch/:branch/:rowIndex", requireAuth, async (req, res) => {
   try {
     const branch = req.params.branch;
+    const sheetTab = BRANCH_MAP[branch];
     const rowIndex = parseInt(req.params.rowIndex, 10);
-    if (!BRANCHES.includes(branch) || !rowIndex || rowIndex < 2) {
+    if (!sheetTab || !rowIndex || rowIndex < 2) {
       return res.status(400).json({ success: false, message: "طلب غير صالح" });
     }
     const data = req.body;
@@ -145,7 +161,7 @@ app.put("/api/branch/:branch/:rowIndex", requireAuth, async (req, res) => {
     const sheets = await getSheetsClient();
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${branch}!A${rowIndex}:Q${rowIndex}`,
+      range: `'${sheetTab}'!A${rowIndex}:Q${rowIndex}`,
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [row] }
     });
@@ -160,14 +176,15 @@ app.put("/api/branch/:branch/:rowIndex", requireAuth, async (req, res) => {
 app.delete("/api/branch/:branch/:rowIndex", requireAuth, async (req, res) => {
   try {
     const branch = req.params.branch;
+    const sheetTab = BRANCH_MAP[branch];
     const rowIndex = parseInt(req.params.rowIndex, 10);
-    if (!BRANCHES.includes(branch) || !rowIndex || rowIndex < 2) {
+    if (!sheetTab || !rowIndex || rowIndex < 2) {
       return res.status(400).json({ success: false, message: "طلب غير صالح" });
     }
     const sheets = await getSheetsClient();
     await sheets.spreadsheets.values.clear({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${branch}!A${rowIndex}:Q${rowIndex}`
+      range: `'${sheetTab}'!A${rowIndex}:Q${rowIndex}`
     });
     res.json({ success: true, message: "تم الحذف" });
   } catch (err) {
