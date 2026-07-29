@@ -169,27 +169,41 @@ function renderCards() {
 
   filtered.forEach(d => {
     const card = document.createElement("div");
-    card.className = "da-card";
-    const initials = (d.daName || "?").trim().split(" ").slice(0, 2).map(w => w[0]).join("");
     const expiryClass = getExpiryClass(d.licenseExpiration);
+    const statusClass = expiryClass === "expiry-warn" ? "status-danger" : expiryClass === "expiry-soon" ? "status-warn" : "status-ok";
+    card.className = "da-card " + statusClass;
+    const initials = (d.daName || "?").trim().split(" ").slice(0, 2).map(w => w[0]).join("");
+    const isFlex = d.flex === "TRUE" || d.flex === true;
 
     card.innerHTML = `
-      <div class="da-card-top">
-        <div style="display:flex;gap:12px;">
-          <div class="avatar">${escapeHtml(initials)}</div>
-          <div>
-            <p class="da-card-name">${escapeHtml(d.daName)}</p>
-            <p class="da-card-vendor">${escapeHtml(d.vendor || "-")}</p>
-          </div>
+      <div class="da-card-head">
+        <div class="avatar">${escapeHtml(initials)}</div>
+        <div class="da-card-heading">
+          <p class="da-card-name">${escapeHtml(d.daName)}</p>
+          <p class="da-card-vendor">${escapeHtml(d.vendor || "-")}${isFlex ? ' <span class="badge-flex">FLEX</span>' : ""}</p>
         </div>
-        ${d.flex === "TRUE" || d.flex === true ? '<span class="badge-flex">FLEX</span>' : ""}
       </div>
-      <div class="da-card-body">
-        <div class="da-row"><span class="k">الرقم القومي</span><span class="v">${escapeHtml(d.nationalId || "-")}</span></div>
-        <div class="da-row"><span class="k">الهاتف</span><span class="v">${escapeHtml(d.phone || "-")}</span></div>
-        <div class="da-row"><span class="k">المركبة</span><span class="v ar">${escapeHtml(d.vehicleType || "-")} · ${escapeHtml(d.vehiclePlate || "-")}</span></div>
-        <div class="da-row"><span class="k">انتهاء الرخصة</span><span class="v ${expiryClass}">${escapeHtml(d.licenseExpiration || "-")}</span></div>
-        <div class="da-row"><span class="k">المنطقة</span><span class="v ar">${escapeHtml(truncate(d.address, 24))}</span></div>
+      <div class="da-card-grid">
+        <div class="da-cell">
+          <span class="cell-label">الرقم القومي</span>
+          <span class="cell-value">${escapeHtml(d.nationalId || "-")}</span>
+        </div>
+        <div class="da-cell">
+          <span class="cell-label">الهاتف</span>
+          <span class="cell-value">${escapeHtml(d.phone || "-")}</span>
+        </div>
+        <div class="da-cell">
+          <span class="cell-label">المركبة</span>
+          <span class="cell-value ar">${escapeHtml(d.vehicleType || "-")} · ${escapeHtml(d.vehiclePlate || "-")}</span>
+        </div>
+        <div class="da-cell">
+          <span class="cell-label">انتهاء الرخصة</span>
+          <span class="cell-value ${expiryClass}">${escapeHtml(d.licenseExpiration || "-")}</span>
+        </div>
+      </div>
+      <div class="da-card-footer">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5s5 3.2 5 7.2a5 5 0 01-10 0c0-4 5-7.2 5-7.2z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8.5" r="1.6" stroke="currentColor" stroke-width="1.3"/></svg>
+        <span>${escapeHtml(truncate(d.address, 30))}</span>
       </div>
     `;
     card.addEventListener("click", () => openEditModal(d));
