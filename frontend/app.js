@@ -155,6 +155,12 @@ function setSyncState(state) {
   syncText.textContent = state === "syncing" ? "جارِ التحديث..." : state === "error" ? "تعذّر الاتصال" : "متصل بالشيت";
 }
 
+function shiftLabel(modelType) {
+  if (modelType === "10H") return "Full Time";
+  if (modelType === "5H") return "Part Time";
+  return "-";
+}
+
 // ============ Render cards ============
 function renderCards() {
   renderDashboard();
@@ -197,8 +203,8 @@ function renderCards() {
       </div>
       <div class="da-card-grid">
         <div class="da-cell">
-          <span class="cell-label">الرقم القومي</span>
-          <span class="cell-value">${escapeHtml(d.nationalId || "-")}</span>
+          <span class="cell-label">الشيفت</span>
+          <span class="cell-value shift-value ${d.modelType === '10H' ? 'shift-full' : d.modelType === '5H' ? 'shift-part' : ''}">${escapeHtml(shiftLabel(d.modelType))}</span>
         </div>
         <div class="da-cell">
           <span class="cell-label">الهاتف</span>
