@@ -251,8 +251,8 @@ input,select{font-family:inherit;}
 /* ============ CARDS ============ */
 .cards-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
-  gap:16px;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:12px;
 }
 .da-card{
   background:var(--surface);
@@ -275,33 +275,33 @@ input,select{font-family:inherit;}
   display:flex;
   flex-direction:row;
   align-items:center;
-  gap:12px;
-  padding:16px 18px 14px;
+  gap:10px;
+  padding:13px 14px 11px;
 }
 .avatar{
-  width:40px;height:40px;
-  border-radius:9px;
+  width:34px;height:34px;
+  border-radius:8px;
   background:var(--navy);
   color:#ffffff;
   display:flex;align-items:center;justify-content:center;
-  font-weight:700;font-size:13.5px;
+  font-weight:700;font-size:12px;
   flex-shrink:0;
 }
 .da-card-heading{min-width:0;flex:1;}
 .da-card-name{
-  font-size:15px;font-weight:700;margin:0 0 2px;color:var(--text);
+  font-size:14px;font-weight:700;margin:0 0 2px;color:var(--text);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .da-card-vendor{
-  font-size:12px;color:var(--text-dim);
+  font-size:11.5px;color:var(--text-dim);
   display:flex;align-items:center;gap:6px;
 }
 .badge-flex{
   background:var(--navy);
   color:#ffffff;
-  font-size:9.5px;
+  font-size:9px;
   font-weight:700;
-  padding:2px 7px;
+  padding:2px 6px;
   border-radius:20px;
   font-family:var(--font-mono);
   letter-spacing:.03em;
@@ -311,8 +311,8 @@ input,select{font-family:inherit;}
 .da-card-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:14px 12px;
-  padding:15px 18px;
+  gap:10px 10px;
+  padding:12px 14px;
   background:var(--surface-2);
   border-top:1px solid var(--line);
   border-bottom:1px solid var(--line);
@@ -324,12 +324,12 @@ input,select{font-family:inherit;}
   min-width:0;
 }
 .cell-label{
-  font-size:11px;
+  font-size:10.5px;
   color:var(--text-dim);
   font-weight:600;
 }
 .cell-value{
-  font-size:14px;
+  font-size:13px;
   color:var(--text);
   font-family:var(--font-mono);
   font-weight:700;
@@ -347,13 +347,14 @@ input,select{font-family:inherit;}
 .da-card-footer{
   display:flex;
   align-items:flex-start;
-  gap:6px;
-  padding:11px 18px;
-  color:var(--text-dim);
+  gap:7px;
+  padding:10px 14px;
+  color:var(--text);
   font-size:12px;
+  font-weight:500;
   line-height:1.4;
 }
-.da-card-footer svg{flex-shrink:0;color:var(--text-faint);margin-top:2px;}
+.da-card-footer svg{flex-shrink:0;color:var(--navy);margin-top:2px;}
 .da-card-footer span{
   display:-webkit-box;
   -webkit-line-clamp:2;
