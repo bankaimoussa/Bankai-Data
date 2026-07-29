@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>منظومة مندوبين التوصيل</title>
+<title>Bankai-Data</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -58,6 +58,54 @@
   <nav class="branch-tabs" id="branchTabs"></nav>
 
   <main class="main">
+    <div class="dashboard" id="dashboard">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-total">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 15c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statTotal">0</span>
+          <span class="stat-label">إجمالي المناديب</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-ok">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statValid">0</span>
+          <span class="stat-label">رخصة سارية</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-warn">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 5v4.5M9 12.2v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statSoon">0</span>
+          <span class="stat-label">قريبة الانتهاء</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-danger">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M6 6l6 6M12 6l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statExpired">0</span>
+          <span class="stat-label">رخصة منتهية</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-flex">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 4.6L15.5 8l-4.7 1.4L9 14l-1.8-4.6L2.5 8l4.7-1.4L9 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statFlex">0</span>
+          <span class="stat-label">Flex</span>
+        </div>
+      </div>
+    </div>
+
     <div class="toolbar">
       <div class="search-wrap">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5.2" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
